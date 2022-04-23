@@ -31,21 +31,26 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   static const platform = const MethodChannel('samples.flutter.dev/battery');
 
-  String _batteryLevel = 'Unknown battery level.';
-
-  Future<void> _getBatteryLevel() async {
+  Future<void> _switchGPIO(int value) async {
     // Get battery level.
-    String batteryLevel;
-    try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
-      batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    print(value.toString());
+    if(value == 1){
+      print("Switch on");
+      try {
+        final String result = await platform.invokeMethod('gpioSetStateOn');
+      } on PlatformException catch (e) {
+        print(e);
+      }
+    }
+    else{
+      print("Switch off");
+      try {
+        final String result = await platform.invokeMethod('gpioSetStateOff');
+      } on PlatformException catch (e) {
+        print(e);
+      }
     }
 
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
   }
 
   @override
@@ -55,11 +60,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            RaisedButton(
-              child: Text('Get Battery Level'),
-              onPressed: _getBatteryLevel,
+            ElevatedButton(
+              child: Text('Switch On'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                ),
+                onPressed: () => _switchGPIO(1)
             ),
-            Text(_batteryLevel),
+            ElevatedButton(
+              child: Text('Switch Off'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
+                ),
+                onPressed: () => _switchGPIO(0)
+            ),
           ],
         ),
       ),
