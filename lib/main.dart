@@ -29,6 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String dockStatus = "Checking dock status...";
   static const platform = const MethodChannel('samples.flutter.dev/battery');
 
   Future<void> _switchGPIO(int value) async {
@@ -52,7 +53,20 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
   }
-
+  Future<void> _getDockStatus() async {
+    // Get battery level.
+      final String result = await platform.invokeMethod('getDockStatus');
+      print(result);
+       setState(() {
+         dockStatus = result;
+       });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _getDockStatus();
+  }
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -73,6 +87,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
                 ),
                 onPressed: () => _switchGPIO(0)
+            ),
+            Container(
+              alignment: Alignment.center,
+              color: Colors.blue,
+              width: MediaQuery.of(context).size.width*1.0,
+              height: 45,
+              child: Text(dockStatus, textAlign: TextAlign.center,),
             ),
           ],
         ),

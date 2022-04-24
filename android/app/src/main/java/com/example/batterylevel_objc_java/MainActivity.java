@@ -33,15 +33,17 @@ public class MainActivity extends FlutterActivity {
         new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
                 .setMethodCallHandler(
                         (call, result) -> {
-                            // Note: this method is invoked on the main thread.
-                            if (call.method.equals("getBatteryLevel")) {
-                                int batteryLevel = getBatteryLevel();
-
-                                if (batteryLevel != -1) {
-                                    result.success(batteryLevel);
-                                } else {
-                                    result.error("UNAVAILABLE", "Battery level not available.", null);
+                            if (call.method.equals("getDockStatus")){
+                                String dockResult = "";
+                                int dockStatus = gpioCheckDockStatus();
+                                System.out.println(dockStatus);
+                                if(dockStatus == 1){
+                                    dockResult = "Docked";
                                 }
+                                else{
+                                    dockResult = "Undocked";
+                                }
+                                result.success("Docking Status: "+dockResult);
                             }
 
                             if (call.method.equals("gpioSetStateOn")) {
@@ -67,30 +69,19 @@ public class MainActivity extends FlutterActivity {
                         }
                 );
         }
-    private int getBatteryLevel() {
-        int batteryLevel = -1;
-        if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-            BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
-            batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-        } else {
-            Intent intent = new ContextWrapper(getApplicationContext()).
-                    registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            batteryLevel = (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
-                    intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-        }
 
-        return batteryLevel;
-    }
+    private int gpioCheckDockStatus() {
 
-    private String gpioReadStateOne() {
-        String value = null;
-        File file = new File("/sys/class/gpio/gpio22/value");
+        String cmd = "echo 1 > /sys/class/gpio/gpio23/value\n";
+        ShellUtils.CommandResult commandResult = shellUtils.execCommand(cmd, false);
+        int value = -1;
+        File file = new File("/sys/class/gpio/gpio33/value");
         try {
             InputStream instream = new FileInputStream(file);
             if (instream != null) {
                 InputStreamReader inputreader = new InputStreamReader(instream);
                 BufferedReader buffreader = new BufferedReader(inputreader);
-                value = buffreader.readLine();
+                value = Integer.parseInt(buffreader.readLine());
                 instream.close();
             }
         } catch (java.io.FileNotFoundException e) {
@@ -118,29 +109,6 @@ public class MainActivity extends FlutterActivity {
 
 }
 
-
-//public class MainActivity extends FlutterActivity {
-//    // You do not need to override onCreate() in order to invoke
-//    // GeneratedPluginRegistrant. Flutter now does that on your behalf.
-//
-//    // ...retain whatever custom code you had from before (if any).
-//    new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL)
-//    .setMethodCallHandler(
-//                (call, result) -> {
-//                    if (call.method.equals("getBatteryLevel")) {
-//                        int batteryLevel = getBatteryLevel();
-//
-//                        if (batteryLevel != -1) {
-//                            result.success(batteryLevel);
-//                        } else {
-//                            result.error("UNAVAILABLE", "Battery level not available.", null);
-//                        }
-//                    } else {
-//                        result.notImplemented();
-//                    }
-//            }
-//    );
-//}
 
 
 
