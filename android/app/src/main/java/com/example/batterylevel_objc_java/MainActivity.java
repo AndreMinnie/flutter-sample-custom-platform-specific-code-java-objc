@@ -64,6 +64,16 @@ public class MainActivity extends FlutterActivity {
                                     result.error("UNAVAILABLE", "GPIO State not available.", null);
                                 }
                             }
+                            else if (call.method.equals("switchAirplaneOn")) {
+                                String airplaneOn = switchAirplaneMode(1);
+                                    result.success("true");
+
+                            }
+                            else if (call.method.equals("switchAirplaneOff")) {
+                                String airplaneOn = switchAirplaneMode(0);
+                                result.success("true");
+
+                            }
 
 
                         }
@@ -91,6 +101,36 @@ public class MainActivity extends FlutterActivity {
         }
 
         return value;
+    }
+
+    private String switchAirplaneMode(int Mode) {
+
+        String cmd = "am broadcast -a com.android.settings.AirplaneOnBroadcast com.android.settings";
+        if(Mode == 0){
+            cmd = "am broadcast -a com.android.settings.AirplaneOffBroadcast com.android.settings";
+        }
+
+//        File file = new File("/sys/class/gpio/gpio33/value");
+//        try {
+        ShellUtils.CommandResult commandResult = shellUtils.execCommand(cmd, true, true);
+        System.out.println(commandResult.result);
+        System.out.println(commandResult.errorMsg);
+
+
+//            InputStream instream = new FileInputStream(file);
+//            if (instream != null) {
+//                InputStreamReader inputreader = new InputStreamReader(instream);
+//                BufferedReader buffreader = new BufferedReader(inputreader);
+//                value = Integer.parseInt(buffreader.readLine());
+//                instream.close();
+//            }
+//         catch (java.io.FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        return "true";
     }
 
     public boolean gpioSetStateOne(int state){

@@ -61,6 +61,18 @@ class _MyHomePageState extends State<MyHomePage> {
          dockStatus = result;
        });
   }
+  Future<void> _switchAirplaneMode(int mode) async {
+    // Switch airplane mode on.
+    String function = 'switchAirplaneOn';
+    if(mode == 0){
+      function = 'switchAirplaneOff';
+    }
+    final String result = await platform.invokeMethod(function);
+    print(result);
+    setState(() {
+      dockStatus = result;
+    });
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -75,18 +87,18 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             ElevatedButton(
-              child: Text('Switch On'),
+              child: Text('Switch Airplane Mode On'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
                 ),
-                onPressed: () => _switchGPIO(1)
+                onPressed: () => _switchAirplaneMode(1)
             ),
             ElevatedButton(
-              child: Text('Switch Off'),
+              child: Text('Switch Airplane Mode Off'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
                 ),
-                onPressed: () => _switchGPIO(0)
+                onPressed: () => _switchAirplaneMode(0)
             ),
             Container(
               alignment: Alignment.center,
